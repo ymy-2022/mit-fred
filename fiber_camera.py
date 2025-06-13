@@ -84,6 +84,9 @@ class FiberCamera(QWidget):
         else:
             binary_frame = frame.copy()
         edges = cv2.Canny(binary_frame, 100, 250, apertureSize=3)
+        lower = self.canny_lower_slider.value()
+        higher = self.canny_higher_slider.value()
+        edges = cv2.Canny(binary_frame, lower, higher, apertureSize=3)
         return edges, binary_frame
 
 
