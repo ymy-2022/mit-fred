@@ -1,4 +1,3 @@
-"""Main file to run the FrED device"""
 import threading
 import time
 
@@ -9,6 +8,9 @@ from spooler import Spooler
 from extruder import Extruder
 
 import RPi.GPIO as GPIO
+
+from PyQt5.QtWidgets import QApplication
+import sys
 
 def hardware_control(gui: UserInterface) -> None:
     """Thread to handle hardware control"""
@@ -66,11 +68,12 @@ def hardware_control(gui: UserInterface) -> None:
 
 if __name__ == "__main__":
     print("Starting FrED Device...")
+    app = QApplication(sys.argv)
     ui = UserInterface()
-    # 启动硬件控制线程（守护线程，主程序退出时自动关闭）
+    # Start hardware control thread as daemon
     hardware_thread = threading.Thread(target=hardware_control, args=(ui,))
     hardware_thread.daemon = True
     hardware_thread.start()
-    # 主线程运行GUI
-    ui.start_gui()
-    print("FrED Device Closed.")
+    # Run GUI in main thread
+    ui.show()
+    sys.exit(app.exec_())
