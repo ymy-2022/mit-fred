@@ -1,12 +1,14 @@
 """Main file to run the FrED device"""
 import threading
 import time
-import RPi.GPIO as GPIO
-from database import Database
+
 from user_interface import UserInterface
+from database import Database
 from fan import Fan
 from spooler import Spooler
 from extruder import Extruder
+
+import RPi.GPIO as GPIO
 
 def hardware_control(gui: UserInterface) -> None:
     """Thread to handle hardware control"""
@@ -32,27 +34,25 @@ def hardware_control(gui: UserInterface) -> None:
             if gui.start_motor_calibration:
                 spooler.calibrate()
                 gui.start_motor_calibration = False
-                
+
             # DC Motor Control Logic
             if gui.dc_motor_open_loop_enabled and not gui.dc_motor_close_loop_enabled:
                 spooler.dc_motor_open_loop_control(current_time)
-                
             elif gui.dc_motor_close_loop_enabled and not gui.dc_motor_open_loop_enabled:
                 spooler.dc_motor_close_loop_control(current_time)
-            
+
             # Heater Control Logic
-            if gui.heater_open_loop_enabled and not gui.device_started:  
-                extruder.temperature_open_loop_control(current_time)     
+            if gui.heater_open_loop_enabled and not gui.device_started:
+                extruder.temperature_open_loop_control(current_time)
                 extruder.stepper_control_loop()
-            
+
             # Camera Feedback PLOT OPEN LOOP
             if gui.camera_feedback_enabled:
                 gui.fiber_camera.camera_feedback(current_time)
-                            
             elif gui.device_started:
                 extruder.temperature_control_loop(current_time)
                 extruder.stepper_control_loop()
-                
+
             fan.control_loop()
             time.sleep(0.05)
         except Exception as e:
@@ -62,15 +62,15 @@ def hardware_control(gui: UserInterface) -> None:
             fan.stop()
             spooler.stop()
             extruder.stop()
+            break
 
 if __name__ == "__main__":
     print("Starting FrED Device...")
     ui = UserInterface()
-    time.sleep(2)
+    # 启动硬件控制线程（守护线程，主程序退出时自动关闭）
     hardware_thread = threading.Thread(target=hardware_control, args=(ui,))
+    hardware_thread.daemon = True
     hardware_thread.start()
-    threading.Lock()
+    # 主线程运行GUI
     ui.start_gui()
-    hardware_thread.join()
     print("FrED Device Closed.")
-
