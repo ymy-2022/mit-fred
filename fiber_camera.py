@@ -71,13 +71,15 @@ class FiberCamera(QWidget):
         self.processed_image.setPixmap(QPixmap(image_for_gui))
 
     def get_edges(self, frame: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """Filter the frame to enhance the edges"""
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         kernel = np.ones((5,5), np.uint8)
-        frame = cv2.erode(frame, kernel, iterations=2)
-        frame = cv2.dilate(frame, kernel, iterations=2)
-        gaussian_blurred = cv2.GaussianBlur(frame, (5, 5), 0) 
-        threshold_value, binary_frame = cv2.threshold(gaussian_blurred, 100, 255, cv2.THRESH_BINARY)
+        if self.erode_checkbox.isChecked():
+            frame = cv2.erode(frame, kernel, iterations=2)
+        if self.dilate_checkbox.isChecked():
+            frame = cv2.dilate(frame, kernel, iterations=2)
+        if self.blur_checkbox.isChecked():
+            frame = cv2.GaussianBlur(frame, (5, 5), 0)
+        threshold_value, binary_frame = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
         edges = cv2.Canny(binary_frame, 100, 250, apertureSize=3)
         return edges, binary_frame
 
