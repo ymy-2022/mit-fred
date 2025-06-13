@@ -41,8 +41,8 @@ class FiberCamera(QWidget):
         edges, binary_frame = self.get_edges(frame)
         # Get diameter from the binary image
         # TODO: Tune and set to constants for fiber line detection
-        detected_lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 30,
-                                         minLineLength=30, maxLineGap=100)
+        hough_threshold = self.hough_threshold_slider.value()
+        detected_lines = cv2.HoughLinesP(edges, 1, np.pi / 180, hough_threshold, minLineLength=30, maxLineGap=100)
         fiber_diameter = self.get_fiber_diameter(detected_lines)
         # Plot lines on the frame
         frame = self.plot_lines(frame, detected_lines)
