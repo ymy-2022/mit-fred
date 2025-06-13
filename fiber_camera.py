@@ -79,7 +79,10 @@ class FiberCamera(QWidget):
             frame = cv2.dilate(frame, kernel, iterations=2)
         if self.blur_checkbox.isChecked():
             frame = cv2.GaussianBlur(frame, (5, 5), 0)
-        threshold_value, binary_frame = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
+        if self.binary_checkbox.isChecked():
+            _, binary_frame = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
+        else:
+            binary_frame = frame.copy()
         edges = cv2.Canny(binary_frame, 100, 250, apertureSize=3)
         return edges, binary_frame
 
