@@ -72,20 +72,15 @@ class FiberCamera(QWidget):
 
     def get_edges(self, frame: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Filter the frame to enhance the edges"""
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # Gray
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         kernel = np.ones((5,5), np.uint8)
         frame = cv2.erode(frame, kernel, iterations=2)
-        frame = cv2.dilate(frame, kernel, iterations=2) #new check change 1 to 2
+        frame = cv2.dilate(frame, kernel, iterations=2)
         gaussian_blurred = cv2.GaussianBlur(frame, (5, 5), 0) 
-        threshold_value, binary_frame = cv2.threshold(
-            gaussian_blurred, 100, 255, cv2.THRESH_BINARY)
-        #print(f'Threshold value: {threshold_value}')
-
-        if FiberCamera.use_binary_for_edges is False:
-            edges = cv2.Canny(gray_frame, 100, 250, apertureSize=3)
-        else:
-            edges = cv2.Canny(binary_frame, 100, 250, apertureSize=3)
+        threshold_value, binary_frame = cv2.threshold(gaussian_blurred, 100, 255, cv2.THRESH_BINARY)
+        edges = cv2.Canny(binary_frame, 100, 250, apertureSize=3)
         return edges, binary_frame
+
 
     def get_fiber_diameter(self, lines):
         """Get the fiber diameter from the edges detected in the image"""
